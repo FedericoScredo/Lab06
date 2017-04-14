@@ -38,6 +38,15 @@ public class Rilevamento {
 	public void setUmidita(int umidita) {
 		this.umidita = umidita;
 	}
+	
+	@SuppressWarnings("deprecation")
+	public int getMese(){
+		return data.getMonth();
+	}
+	
+	public String dataInStringa(){
+		return data.getYear()+"-"+data.getMonth()+"-"+data.getDay();
+	}
 
 	// @Override
 	// public String toString() {
@@ -48,5 +57,4 @@ public class Rilevamento {
 	public String toString() {
 		return String.valueOf(umidita);
 	}
-
 }
