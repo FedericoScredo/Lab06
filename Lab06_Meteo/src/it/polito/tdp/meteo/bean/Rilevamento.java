@@ -14,6 +14,11 @@ public class Rilevamento {
 		this.data = data;
 		this.umidita = umidita;
 	}
+	
+	public Rilevamento(String localita,int umidita){
+		this.localita=localita;
+		this.umidita=umidita;
+	}
 
 	public String getLocalita() {
 		return localita;

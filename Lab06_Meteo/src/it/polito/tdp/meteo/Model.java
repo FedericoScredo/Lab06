@@ -22,11 +22,13 @@ public class Model {
 	private List<Rilevamento> rilevamenti;
 	private Set<Citta> cittadatabase;
 	private int mese;
+	private int x;
 
 	public Model() {
 		dao=new MeteoDAO();
 		rilevamenti=new LinkedList<Rilevamento>();
 		cittadatabase=new HashSet<Citta>();
+		x=0;
 	}
 	
 	public void importaDati(){
@@ -48,42 +50,45 @@ public class Model {
 
 	public String trovaSequenza(int mese) {
 		this.mese=mese;
-		Set<Citta> temp=null;
-		Set<Citta> best=null;
+		List<Citta> temp=new LinkedList<Citta>();
+		List<Citta> best=new LinkedList<Citta>();
 		String s="";
-		Set<Citta> sol=ricorsione(0,temp,best);
-		s=s+"costo"+punteggioSoluzione(sol)+"\n";
+		List<Citta> sol=ricorsione(0,temp,best);
+		s=s+"costo "+punteggioSoluzione(sol)+"\n";
 		for (Citta c:sol){
-			s=s+c.getNome()+"\n";
+			s=s+c.getNome()+"\n"+c.getNome()+"\n"+c.getNome()+"\n";
 		}
 		return s;
 	}
 	
-	private Set<Citta> ricorsione(int livello,Set<Citta> temp,Set<Citta> best){
-		if (livello>15){
-			if (punteggioSoluzione(temp)>=punteggioSoluzione(best))
+	private List<Citta> ricorsione(int livello,List<Citta> temp,List<Citta> best){
+		if (controllaParziale(temp)==true){
+			if (punteggioSoluzione(temp)<=punteggioSoluzione(best) || punteggioSoluzione(best)==0){
+				x++;
+				System.out.println("TROVATA UNA SOLUZIONE numero: "+x+" con punteggio: "+punteggioSoluzione(temp));
 				best.clear();
 				best.addAll(temp);
+			}
 		}
 		else{
-			System.out.println("entrato");
-			System.out.println(dao.getCitta().size());
+			//System.out.println("entrato");
+			//System.out.println(dao.getCitta()+" "+dao.getCitta().size());
 			for (Citta c:dao.getCitta()){
-				System.out.println("   citta "+c.getNome());				
 				if (numeroGiorniVisitata(c,temp)<=6){
-					System.out.println("     provo ad aggiungerla");
-					temp.add(new Citta(c.getNome()));
-					System.out.println("     ricorsione a livello successivo");
+					//System.out.println(livello+" citta "+c);				
+					//System.out.println("provo ad aggiungerla");
+					temp.add(c);
+					//System.out.println("ricorsione a livello successivo "+(livello+1));
 					ricorsione(livello+3,temp,best);
-					System.out.println("     la rimuovo");
-					temp.remove(c);
+					//System.out.println(livello+" la rimuovo");
+					temp.remove(temp.size()-1);
 				}
 			}
 		}
 		return best;
 	}
 
-	private Double punteggioSoluzione(Set<Citta> soluzioneCandidata) {
+	private Double punteggioSoluzione(List<Citta> soluzioneCandidata) {
 		double score = 0.0;
 		int x=1;
 		for (Citta c:soluzioneCandidata){
@@ -93,12 +98,19 @@ public class Model {
 		return score;
 	}
 
-	private boolean controllaParziale(List<SimpleCity> parziale) {
-
-		return true;
+	private boolean controllaParziale(List<Citta> parziale) {
+		if (parziale.size()==5){
+			for (Citta c:parziale){
+				if (numeroGiorniVisitata(c,parziale)>6 || numeroGiorniVisitata(c,parziale)<3)
+					return false;
+			}
+			return true;
+		}
+		else
+			return false;
 	}
 	
-	private int numeroGiorniVisitata(Citta c,Set<Citta> temp){
+	private int numeroGiorniVisitata(Citta c,List<Citta> temp){
 		int x=0;
 		if (temp==null){
 			return 0;
@@ -106,20 +118,17 @@ public class Model {
 		else
 		{
 			for (Citta citta:temp){
-				if (citta.equals(c)){
-					x++;
+				if (citta.getNome().compareTo(c.getNome())==0){
+					x=x+3;
 				}
 			}
 			return x;
 		}
 	}
 	
-	private double getRilevamento(Citta citta,int anno,int mese,int giorno){
-		for (Rilevamento r:rilevamenti){
-			if (r.getLocalita().compareTo(citta.getNome())==0 && r.getData().compareTo(new Date(anno,mese,giorno))==0)
-				return r.getUmidita();
-		}
-		return 0;
+	@SuppressWarnings("deprecation")
+	public double getRilevamento(Citta citta,int anno,int mese,int giorno){
+		return dao.getRilevamento(citta.getNome(), anno, mese, giorno).getUmidita();
 	}
 
 }

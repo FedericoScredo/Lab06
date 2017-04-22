@@ -54,16 +54,16 @@ public class MeteoDAO {
 
 	public Double getAvgRilevamentiLocalitaMese(int mese, String localita) {
 		
-		//final String sql1= "SELECT COUNT(Umidita) AS numero FROM situazione WHERE Localita='?' AND Data BETWEEN '?' AND '?'";
-		final String sql1= "SELECT AVG(Umidita) AS media FROM situazione WHERE Localita='"+localita+"'AND MONTH(Data)='"+mese+"'";
+		//final String sql1= "SELECT COUNT(Umidita) AS numero FROM situazione WHERE Localita=? AND Data BETWEEN ? AND ?";
+		final String sql1= "SELECT AVG(Umidita) AS media FROM situazione WHERE Localita=? AND MONTH(Data)=?";
 		
 		double numero=0;
 		
 		try {
 			Connection conn = DBConnect.getInstance().getConnection();
 			PreparedStatement st = conn.prepareStatement(sql1);
-//			st.setString(1,localita);
-//			st.setLong(2, mese);
+			st.setString(1,localita);
+			st.setLong(2, mese);
 			ResultSet rs = st.executeQuery();
 
 			while (rs.next()) {
@@ -114,6 +114,37 @@ public class MeteoDAO {
 		}
 		
 		return temp;
+	}
+	
+	public Rilevamento getRilevamento(String citta,int anno, int mese,int giorno){		
+	
+		final String sql="SELECT Umidita FROM Situazione WHERE DAY(Data)=? AND MONTH(Data)=? AND YEAR(Data)=? AND Localita=?";
+		Rilevamento r=null;
+		
+		try {
+			Connection conn = DBConnect.getInstance().getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1,giorno);
+			st.setInt(2, mese);
+			st.setInt(3, anno);
+			st.setString(4, citta);
+			ResultSet rs = st.executeQuery();
+	
+			while (rs.next()) {
+				
+				r=new Rilevamento(citta,rs.getInt("Umidita"));
+	
+			}
+	
+			conn.close();
+	
+		} catch (SQLException e) {
+	
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		
+		return r;
 	}
 
 }
